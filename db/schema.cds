@@ -17,6 +17,7 @@ entity Travel : managed {
   BookingFee     : Decimal(16, 3);
   TotalPrice     : Decimal(16, 3) @readonly;
   CurrencyCode   : Currency;
+  Progress : Integer @readonly;
   Description    : String(1024);
   TravelStatus   : Association to TravelStatus @readonly;
   to_Agency      : Association to TravelAgency;
@@ -24,7 +25,7 @@ entity Travel : managed {
   to_Booking     : Composition of many Booking on to_Booking.to_Travel = $self;
 };
 
-entity Booking : managed {
+entity Booking @(cds.autoexpose) : managed {
   key BookingUUID   : UUID;
   BookingID         : Integer @Core.Computed;
   BookingDate       : Date;
@@ -32,6 +33,7 @@ entity Booking : managed {
   FlightDate        : Date;
   FlightPrice       : Decimal(16, 3);
   CurrencyCode      : Currency;
+  TotalSupplPrice : Decimal(16, 3);
   BookingStatus     : Association to BookingStatus;
   to_BookSupplement : Composition of many BookingSupplement on to_BookSupplement.to_Booking = $self;
   to_Carrier        : Association to Airline;
