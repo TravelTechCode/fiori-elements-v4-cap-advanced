@@ -296,3 +296,77 @@ annotate TravelService.TravelAgency with @(Communication.Contact #contact: {
         country : CountryCode_code,
     }, ],
 });
+annotate TravelService.Travel with @(
+    UI.SelectionPresentationVariant #tableView : {
+        $Type : 'UI.SelectionPresentationVariantType',
+        PresentationVariant : ![@UI.PresentationVariant],
+        SelectionVariant : {
+            $Type : 'UI.SelectionVariantType',
+            SelectOptions : [ {
+                   $Type       : 'UI.SelectOptionType',
+                   PropertyName: TravelStatus_code,
+                   Ranges      : [{
+                       $Type : 'UI.SelectionRangeType',
+                       Sign  : #I,
+                       Option: #EQ,
+                       Low   : 'O',
+                   }, ],
+        }],
+        },
+        Text : '{i18n>OpenView}',
+    },
+    UI.LineItem #tableView : [
+    ],
+    UI.SelectionPresentationVariant #tableView1 : {
+        $Type : 'UI.SelectionPresentationVariantType',
+        PresentationVariant : {
+            $Type : 'UI.PresentationVariantType',
+            Visualizations : [
+                '@UI.LineItem#tableView',
+            ],
+        },
+        SelectionVariant : {
+            $Type : 'UI.SelectionVariantType',
+            SelectOptions : [{
+                  $Type       : 'UI.SelectOptionType',
+                  PropertyName: TravelStatus_code,
+                   Ranges      : [{
+                       $Type : 'UI.SelectionRangeType',
+                       Sign  : #I,
+                       Option: #EQ,
+                       Low   : 'A',
+                   }, ],
+               }
+            ],
+        },
+        Text : '{i18n>AcceptedView}',
+    }
+);
+annotate TravelService.Travel with @(
+    UI.LineItem #tableView1 : [
+    ],
+    UI.SelectionPresentationVariant #tableView2 : {
+        $Type : 'UI.SelectionPresentationVariantType',
+        PresentationVariant : {
+            $Type : 'UI.PresentationVariantType',
+            Visualizations : [
+                '@UI.LineItem#tableView1',
+            ],
+        },
+        SelectionVariant : {
+            $Type : 'UI.SelectionVariantType',
+            SelectOptions : [{
+                   $Type       : 'UI.SelectOptionType',
+                   PropertyName: TravelStatus_code,
+                   Ranges      : [{
+                       $Type : 'UI.SelectionRangeType',
+                       Sign  : #I,
+                       Option: #EQ,
+                       Low   : 'X',
+                   }, ],
+               }
+            ],
+        },
+        Text : '{i18n>RejectedView}',
+    }
+);
