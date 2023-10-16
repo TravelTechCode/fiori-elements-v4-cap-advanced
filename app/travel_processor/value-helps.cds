@@ -93,6 +93,7 @@ annotate my.Booking {
     Parameters : [
       {$Type: 'Common.ValueListParameterInOut', LocalDataProperty: to_Carrier_AirlineID,    ValueListProperty: 'AirlineID'},
       {$Type: 'Common.ValueListParameterInOut', LocalDataProperty: ConnectionID, ValueListProperty: 'ConnectionID'},
+      {$Type: 'Common.ValueListParameterInOut', LocalDataProperty: FlightDate,  ValueListProperty: 'FlightDate'},
       {$Type: 'Common.ValueListParameterDisplayOnly',  ValueListProperty: 'FlightDate'},
       {$Type: 'Common.ValueListParameterDisplayOnly',  ValueListProperty: 'Price'},
       {$Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'CurrencyCode_code'},

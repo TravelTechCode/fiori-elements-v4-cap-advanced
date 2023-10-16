@@ -28,6 +28,7 @@ annotate schema.Booking with @title: '{i18n>Booking}' {
   BookingDate   @title: '{i18n>BookingDate}';
   ConnectionID  @title: '{i18n>ConnectionID}';
   CurrencyCode  @title: '{i18n>CurrencyCode}';
+  TotalSupplPrice @title : '{i18n>TotalSupplPrice}';
   FlightDate    @title: '{i18n>FlightDate}';
   FlightPrice   @title: '{i18n>FlightPrice}'    @Measures.ISOCurrency: CurrencyCode_code;
   BookingStatus @title: '{i18n>BookingStatus}'  @Common.Text: BookingStatus.name    @Common.TextArrangement: #TextOnly;

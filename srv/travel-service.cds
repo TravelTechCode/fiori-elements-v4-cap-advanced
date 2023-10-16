@@ -32,7 +32,8 @@ service TravelService @(path:'/processor') {
     // **TravelStatus**
     TravelStatus.name as TravelStatusName,
     @Common.Text: TravelStatusName
-    TravelStatus
+    TravelStatus,
+    
   } actions {
     action createTravelByTemplate() returns Travel;
     action rejectTravel();
@@ -45,7 +46,10 @@ service TravelService @(path:'/processor') {
     *,
     FirstName || ' ' || LastName as FullName: String @title : '{i18n>fullName}',
     to_Booking: Association to many my.Booking on to_Booking.to_Customer = $self
-  }
+  };
+
+  entity Booking as projection on my.Booking;
+  entity SupplementScope as projection on my.SupplementScope;
 
   // Booking, Travel, Passenger: Use "FullName" as text annotation of CustomerID
   annotate Booking {

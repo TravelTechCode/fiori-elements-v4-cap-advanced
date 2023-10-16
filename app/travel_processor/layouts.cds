@@ -18,6 +18,11 @@ annotate TravelService.Travel with @UI: {
             $Type : 'UI.DataFieldForAction',
             Action: 'TravelService.rejectTravel',
             Label : '{i18n>RejectTravel}'
+        },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action: 'TravelService.deductDiscount',
+            Label : '{i18n>DeductDiscount}',
         }
     ],
     HeaderInfo                : {
@@ -117,8 +122,14 @@ annotate TravelService.Travel with @UI: {
             Value             : to_Customer_CustomerID,
             ![@UI.Importance] : #High
         },
-        {Value: BeginDate},
-        {Value: EndDate},
+        {
+            Value         : BeginDate,
+          //  ![@UI.Hidden] : TravelStatus.cancelRestrictions
+        },
+        {
+            Value         : EndDate,
+          //  ![@UI.Hidden] : TravelStatus.cancelRestrictions
+        },
         {Value: BookingFee},
         {Value: TotalPrice},
         {
@@ -149,12 +160,21 @@ annotate TravelService.Travel with @UI: {
             $Type : 'UI.CollectionFacet',
             Label : '{i18n>GeneralInformation}',
             ID    : 'Travel',
-            Facets: [{ // travel details
-                $Type : 'UI.ReferenceFacet',
-                ID    : 'TravelData',
-                Target: '@UI.FieldGroup#TravelData',
-                Label : '{i18n>GeneralInformation}'
-            }]
+            Facets: [
+                { // travel details
+                    $Type : 'UI.ReferenceFacet',
+                    ID    : 'TravelData',
+                    Target: '@UI.FieldGroup#TravelData',
+                    Label : '{i18n>GeneralInformation}'
+                },
+                {
+                    $Type                : 'UI.ReferenceFacet',
+                    Label                : '{i18n>TravelAdministrativeData}',
+                    ID                   : 'TravelAdministrativeData',
+                    Target               : '@UI.FieldGroup#TravelAdministrativeData',
+                    ![@UI.PartOfPreview] : false,
+                }
+            ]
         },
         { // booking list
             $Type : 'UI.ReferenceFacet',
@@ -166,7 +186,17 @@ annotate TravelService.Travel with @UI: {
         {Value: TravelID},
         {Value: to_Agency_AgencyID},
         {Value: to_Customer_CustomerID},
-        {Value: Description}
+        {Value: Description},
+        {
+            $Type: 'UI.DataField',
+            Value: EndDate,
+            ![@UI.Hidden]: TravelStatus.cancelRestrictions
+        },
+        {
+            $Type: 'UI.DataField',
+            Value: BeginDate,
+            ![@UI.Hidden]: TravelStatus.cancelRestrictions
+        }
     ]},
     FieldGroup #DateData      : {Data: [
         {
@@ -216,14 +246,14 @@ annotate TravelService.Booking with @UI: {
             ![@UI.Importance] : #High
         },
         {
-            Value             : BookingStatus_code,
-            ![@UI.Importance] : #High
+            $Type             : 'UI.DataFieldForAnnotation',
+            Target            : '@UI.Chart#TotalSupplPrice',
+            Label             : '{i18n>Totalsupplpricechart}',
+            ![@UI.Importance] : #High,
         },
         {
-            $Type             : 'UI.DataFieldForAnnotation',
-            Target            : '@UI.Chart#TotalSupplPrice1',
-            Label             : 'TotalSupplPrice',
-            ![@UI.Importance] : #High,
+            Value             : BookingStatus_code,
+            ![@UI.Importance] : #High
         },
     ],
     Facets                        : [
@@ -320,21 +350,21 @@ annotate TravelService.Travel with @(UI.DataPoint #Progress: {
 annotate TravelService.Booking with @(
     UI.DataPoint #TotalSupplPrice: {
         Value                 : TotalSupplPrice,
-        MinimumValue          : 0,
-        MaximumValue          : 120,
-        TargetValue           : 100,
+        MinimumValue          : {$edmJson: {$Path: '/SupplementScope/MinimumValue'}},
+        MaximumValue          : {$edmJson: {$Path: '/SupplementScope/MaximumValue'}},
+        TargetValue           : {$edmJson: {$Path: '/SupplementScope/TargetValue'}},
         Visualization         : #BulletChart,
         //  Criticality : TotalSupplPrice, // it has precedence over criticalityCalculation => in order to have the criticality color do not use it
         CriticalityCalculation: {
             $Type                 : 'UI.CriticalityCalculationType',
             ImprovementDirection  : #Maximize,
-            DeviationRangeLowValue: 20,
-            ToleranceRangeLowValue: 75
+            DeviationRangeLowValue: {$edmJson: {$Path: '/SupplementScope/DeviationRangeLowValue'}},
+            ToleranceRangeLowValue: {$edmJson: {$Path: '/SupplementScope/ToleranceRangeLowValue'}}
         }
     },
     UI.Chart #TotalSupplPrice    : {
         ChartType        : #Bullet,
-        Title            : 'total supplements',
+        Title            : '{i18n>TotalSupplements}',
         AxisScaling      : {$Type: 'UI.ChartAxisScalingType', },
         Measures         : [TotalSupplPrice, ],
         MeasureAttributes: [{
@@ -342,24 +372,12 @@ annotate TravelService.Booking with @(
             Role     : #Axis1,
             Measure  : TotalSupplPrice,
         }, ],
-    }
-);
-
-annotate TravelService.Booking with @(
-    UI.DataPoint #TotalSupplPrice1: {
-        Value       : TotalSupplPrice,
-        MinimumValue: 0,
-        MaximumValue: 120,
     },
-    UI.Chart #TotalSupplPrice1    : {
-        ChartType        : #Bullet,
-        Measures         : [TotalSupplPrice, ],
-        MeasureAttributes: [{
-            DataPoint: '@UI.DataPoint#TotalSupplPrice1',
-            Role     : #Axis1,
-            Measure  : TotalSupplPrice,
-        }, ],
-    }
+    UI.HeaderFacets              : [{
+        $Type : 'UI.ReferenceFacet',
+        ID    : 'TotalSupplPrice',
+        Target: '@UI.Chart#TotalSupplPrice',
+    }, ]
 );
 
 annotate TravelService.TravelAgency with @(Communication.Contact #contact: {
@@ -378,4 +396,73 @@ annotate TravelService.TravelAgency with @(Communication.Contact #contact: {
         locality: City,
         country : CountryCode_code,
     }, ],
+});
+
+annotate TravelService.Travel with @(
+    UI.DataPoint #TravelStatus_code: {
+        $Type      : 'UI.DataPointType',
+        Value      : TravelStatus_code,
+        Title      : '{i18n>TravelStatus}',
+        Criticality: TravelStatus.criticality,
+    },
+    UI.HeaderFacets                : [
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID    : 'TravelStatus_code',
+            Target: '@UI.DataPoint#TravelStatus_code',
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID    : 'TotalPrice',
+            Target: '@UI.DataPoint#TotalPrice',
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID    : 'Progress',
+            Target: '@UI.DataPoint#progress',
+        },
+    ]
+);
+
+annotate TravelService.Travel with @(UI.DataPoint #TotalPrice: {
+    $Type: 'UI.DataPointType',
+    Value: TotalPrice,
+    Title: '{i18n>TotalPrice}',
+});
+
+annotate TravelService.Travel with @(UI.DataPoint #progress: {
+    $Type        : 'UI.DataPointType',
+    Value        : Progress,
+    Title        : '{i18n>ProgressOfTravel}',
+    TargetValue  : 100,
+    Visualization: #Progress,
+});
+
+annotate TravelService.Travel with {
+    Description @UI.MultiLineText: true
+                @UI.Placeholder  : '{i18n>DescrPlcehlder}'
+};
+
+
+annotate TravelService.Travel with @(UI.FieldGroup #TravelAdministrativeData: {
+    $Type: 'UI.FieldGroupType',
+    Data : [
+        {
+            $Type: 'UI.DataField',
+            Value: createdBy,
+        },
+        {
+            $Type: 'UI.DataField',
+            Value: createdAt,
+        },
+        {
+            $Type: 'UI.DataField',
+            Value: LastChangedBy,
+        },
+    ],
+});
+
+annotate TravelService.Travel @(Common.SideEffects #ReactonItemCreationOrDeletion: {
+    SourceEntities  : [to_Booking],
+    TargetProperties: ['TotalPrice']
 });

@@ -20,12 +20,12 @@ entity Travel : managed {
   Progress : Integer @readonly;
   Description    : String(1024);
   TravelStatus   : Association to TravelStatus @readonly;
-  to_Agency      : Association to TravelAgency;
+  to_Agency      : Association to TravelAgency; @assert.target
   to_Customer    : Association to Passenger;
   to_Booking     : Composition of many Booking on to_Booking.to_Travel = $self;
 };
 
-entity Booking @(cds.autoexpose) : managed {
+entity Booking : managed {
   key BookingUUID   : UUID;
   BookingID         : Integer @Core.Computed;
   BookingDate       : Date;
@@ -33,7 +33,7 @@ entity Booking @(cds.autoexpose) : managed {
   FlightDate        : Date;
   FlightPrice       : Decimal(16, 3);
   CurrencyCode      : Currency;
-  TotalSupplPrice : Decimal(16, 3);
+  TotalSupplPrice   : Decimal(16, 3);
   BookingStatus     : Association to BookingStatus;
   to_BookSupplement : Composition of many BookingSupplement on to_BookSupplement.to_Booking = $self;
   to_Carrier        : Association to Airline;
@@ -77,7 +77,17 @@ entity TravelStatus : CodeList {
   fieldControl: Integer @odata.Type:'Edm.Byte'; // 1: #ReadOnly, 7: #Mandatory
   createDeleteHidden: Boolean;
   insertDeleteRestriction: Boolean; // = NOT createDeleteHidden
+  cancelRestrictions: Boolean; // is true for cancelled travels
 }
+@odata.singleton
+entity SupplementScope @cds.autoexpose {
+  MinimumValue : Integer @Common.Label: 'Minimum Value';
+  MaximumValue : Integer @Common.Label: 'Maximum Value';
+  TargetValue : Integer @Common.Label: 'Target Value';
+  DeviationRangeLowValue : Integer @Common.Label: 'Deviation Range Threshold';
+  ToleranceRangeLowValue : Integer @Common.Label: 'Tolerance Range Threshold'; 
+}
+
 
 annotate Travel with @(
 Capabilities: {
@@ -90,3 +100,4 @@ Capabilities: {
 		AllowedExpressions: 'SingleRange'
 	}]}
 });
+
